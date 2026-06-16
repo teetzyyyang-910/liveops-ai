@@ -247,6 +247,20 @@
   .diag-rec-card.secondary { border-color: rgba(124,92,252,.25); }
   .diag-rec-card.avoid { border-color: rgba(255,77,109,.25); background: rgba(255,77,109,.03); }
 
+  .event-type-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 4px;
+  }
+  .event-type-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 10px 8px; cursor: pointer; transition: border-color .2s, background .2s;
+    text-align: left; font-family: var(--sans);
+  }
+  .event-type-card:hover { border-color: rgba(0,229,160,.4); }
+  .event-type-card.selected { border-color: var(--accent); background: rgba(0,229,160,.06); }
+  .event-type-card .etc-icon { font-size: 18px; margin-bottom: 4px; }
+  .event-type-card .etc-name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .event-type-card .etc-tag  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
   .pain-icon { font-size: 22px; margin-bottom: 10px; }
   .pain-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
   .pain-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
@@ -1341,7 +1355,40 @@
 
       <div class="form-group">
         <label class="form-label req">活動類型</label>
-        <select autocomplete="off" id="eventType" onchange="updateTierVisibility(); updateEventTypeHint()">
+        <div class="event-type-grid" id="eventTypeCards">
+          <div class="event-type-card" data-val="login" onclick="selectEventType('login',this)">
+            <div class="etc-icon">🎯</div>
+            <div class="etc-name">每日登入</div>
+            <div class="etc-tag">留存・習慣養成</div>
+          </div>
+          <div class="event-type-card selected" data-val="task_chain" onclick="selectEventType('task_chain',this)">
+            <div class="etc-icon">📋</div>
+            <div class="etc-name">任務鏈</div>
+            <div class="etc-tag">留存・參與深度</div>
+          </div>
+          <div class="event-type-card" data-val="cumulative" onclick="selectEventType('cumulative',this)">
+            <div class="etc-icon">💰</div>
+            <div class="etc-name">累積消費</div>
+            <div class="etc-tag">付費・消費深度</div>
+          </div>
+          <div class="event-type-card" data-val="cumulative_recharge" onclick="selectEventType('cumulative_recharge',this)">
+            <div class="etc-icon">💳</div>
+            <div class="etc-name">累積儲值</div>
+            <div class="etc-tag">付費・首充轉化</div>
+          </div>
+          <div class="event-type-card" data-val="ranking" onclick="selectEventType('ranking',this)">
+            <div class="etc-icon">🏆</div>
+            <div class="etc-name">排行榜競技</div>
+            <div class="etc-tag">活躍・競爭感</div>
+          </div>
+          <div class="event-type-card" data-val="limited_time" onclick="selectEventType('limited_time',this)">
+            <div class="etc-icon">⏱</div>
+            <div class="etc-name">限時兌換</div>
+            <div class="etc-tag">活躍・緊迫感</div>
+          </div>
+        </div>
+        <!-- Hidden select for form compatibility -->
+        <select id="eventType" style="display:none" onchange="updateTierVisibility(); updateEventTypeHint()">
           <option value="login">每日登入活動</option>
           <option value="cumulative">累積消費活動</option>
           <option value="cumulative_recharge">累積儲值活動</option>
@@ -1370,11 +1417,11 @@
       <div class="form-group">
         <label class="form-label req">獎勵類型（可多選）</label>
         <div class="checkbox-group" id="rewardChips">
-          <div class="chip active" data-val="soft_currency">軟幣</div>
-          <div class="chip" data-val="hard_currency">硬幣</div>
-          <div class="chip active" data-val="limited_item">限定道具</div>
-          <div class="chip" data-val="equipment">裝備材料</div>
-          <div class="chip" data-val="cosmetic">外觀道具</div>
+          <div class="chip active" data-val="soft_currency">🪙 軟幣</div>
+          <div class="chip" data-val="hard_currency">💎 硬幣</div>
+          <div class="chip active" data-val="limited_item">⚔️ 限定道具</div>
+          <div class="chip" data-val="equipment">🔧 裝備材料</div>
+          <div class="chip" data-val="cosmetic">👗 外觀道具</div>
         </div>
       </div>
 
@@ -1401,13 +1448,27 @@
           <span class="slider-val" id="valCasual">60%</span>
         </div>
         <div class="slider-sum ok" id="sliderSum">合計：100% ✓</div>
+        <div style="margin-top:8px;border-radius:6px;overflow:hidden;height:8px;display:flex;gap:1px" id="playerDistBar">
+          <div id="distBarWhale"  style="background:#00e5a0;transition:width .3s;height:100%;width:10%" title="鯨魚"></div>
+          <div id="distBarMid"    style="background:#a78bfa;transition:width .3s;height:100%;width:30%" title="中度"></div>
+          <div id="distBarCasual" style="background:#6b7280;transition:width .3s;height:100%;width:60%" title="輕度"></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:4px;font-size:10px;color:var(--muted)">
+          <span><span style="color:#00e5a0">■</span> 鯨魚</span>
+          <span><span style="color:#a78bfa">■</span> 中度</span>
+          <span><span style="color:#6b7280">■</span> 輕度</span>
+        </div>
       </div>
 
       <!-- optional -->
-      <div class="optional-section">
-        <button class="optional-toggle" onclick="toggleOptional()" id="optToggle">
-          <span id="optArrow">▶</span> 輸入歷史留存數據（選填，更準確）
-        </button>
+      <div style="background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.15);border-radius:10px;padding:10px 14px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:12px;font-weight:700;color:var(--accent)">📊 歷史留存數據（選填，更準確）</div>
+          <button onclick="toggleOptional()" id="optToggle"
+            style="font-size:11px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:5px;padding:3px 10px;cursor:pointer;font-family:var(--sans)">
+            展開
+          </button>
+        </div>
         <div id="optFields" style="display:none">
           <div class="form-group">
             <label class="form-label rec">歷史 D1 留存 %</label>
@@ -3208,6 +3269,15 @@ function updateTierVisibility() {
 }
 
 // ─── Sliders ─────────────────────────────────────────
+function selectEventType(val, el) {
+  // Update hidden select
+  const sel = document.getElementById('eventType');
+  if (sel) { sel.value = val; updateTierVisibility(); updateEventTypeHint(); }
+  // Update card UI
+  document.querySelectorAll('.event-type-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
 function updateSliders() {
   const w = +document.getElementById('sliderWhale').value;
   const m = +document.getElementById('sliderMid').value;
@@ -3219,14 +3289,22 @@ function updateSliders() {
   const el = document.getElementById('sliderSum');
   el.textContent = `合計：${sum}%` + (sum === 100 ? ' ✓' : ' ⚠ 需等於 100%');
   el.className = 'slider-sum ' + (sum === 100 ? 'ok' : 'warn');
+  // Update distribution bar
+  const bw = document.getElementById('distBarWhale');
+  const bm = document.getElementById('distBarMid');
+  const bc = document.getElementById('distBarCasual');
+  if (bw) bw.style.width = w + '%';
+  if (bm) bm.style.width = m + '%';
+  if (bc) bc.style.width = c + '%';
 }
 
 // ─── Optional fields ─────────────────────────────────
 function toggleOptional() {
   const f = document.getElementById('optFields');
-  const open = f.style.display !== 'none';
+  const btn = document.getElementById('optToggle');
+  const open = f.style.display !== 'none' && f.style.display !== '';
   f.style.display = open ? 'none' : 'block';
-  document.getElementById('optArrow').textContent = open ? '▶' : '▼';
+  if (btn) btn.textContent = open ? '展開' : '收起';
 }
 
 // ─── Tab switch ──────────────────────────────────────
@@ -3416,25 +3494,60 @@ function renderReward(r) {
 
   const tierColors = ['tier-1','tier-2','tier-3','tier-4','tier-5','tier-6','tier-7','tier-8','tier-9','tier-10'];
 
-  const tierRows = tiers.map((t,i) => `
+  const tierRows = tiers.map((t,i) => {
+    const crRaw = t.estimated_completion_rate || '—';
+    const crNum = parseInt(crRaw);
+    const crColor = crNum < 30 ? 'var(--accent)' : crNum < 60 ? 'var(--warn)' : 'var(--danger)';
+    const crBar = !isNaN(crNum) ? `
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-family:var(--mono);font-weight:700;color:${crColor};min-width:36px">${crRaw}</span>
+        <div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;min-width:40px">
+          <div style="width:${crNum}%;height:100%;background:${crColor};border-radius:2px"></div>
+        </div>
+      </div>` : crRaw;
+    return `
     <tr>
       <td><span class="tier-badge ${tierColors[i] || 'tier-5'}">Tier ${t.tier}</span></td>
       <td>${t.name || ''}</td>
       <td>${t.condition || ''}</td>
       <td>${t.rewards || ''}</td>
       <td>${t.target_segment || ''}</td>
-      <td style="font-family:var(--mono);color:var(--accent)">${t.estimated_completion_rate || '—'}</td>
-    </tr>`).join('');
+      <td style="min-width:90px">${crBar}</td>
+    </tr>`;
+  }).join('');
 
-  const warnCards = warnings.map(w => `
-    <div class="warning-card ${w.severity}">
-      <div class="warning-dot ${w.severity}"></div>
-      <div>
-        <div class="warning-type">${w.type} · ${w.severity}</div>
+  // Friendly label map for warning types
+  const warnTypeMap = {
+    'UNDER_REWARDED':     '獎勵偏低',
+    'OVER_REWARDED':      '獎勵過高',
+    'BARRIER_TOO_HIGH':   '門檻過高',
+    'BARRIER_TOO_LOW':    '門檻過低',
+    'ECONOMY_IMBALANCE':  '經濟失衡',
+    'REWARD_MONOTONY':    '獎勵單調',
+    'TIER_GAP_TOO_LARGE': 'Tier 落差過大',
+    'COMPLETION_SKEWED':  '完成率分佈不均',
+    'WHALE_UNDER_SERVED': '鯨魚吸引力不足',
+    'CASUAL_EXCLUDED':    '輕度玩家被排除',
+  };
+
+  const warnCards = warnings.map(w => {
+    const sevColor = w.severity === 'high' ? '#ff4d6d' : w.severity === 'medium' ? '#f5a623' : '#00e5a0';
+    const sevBg    = w.severity === 'high' ? 'rgba(255,77,109,.06)' : w.severity === 'medium' ? 'rgba(245,166,35,.06)' : 'rgba(0,229,160,.06)';
+    const sevLabel = w.severity === 'high' ? 'HIGH' : w.severity === 'medium' ? 'MED' : 'LOW';
+    const sevIcon  = w.severity === 'high' ? '⚠' : w.severity === 'medium' ? '△' : '✓';
+    const typeLabel = warnTypeMap[w.type] || w.type?.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) || '—';
+    return `
+    <div class="warning-card ${w.severity}" style="border-left:3px solid ${sevColor};background:${sevBg}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+          <span style="font-size:10px;font-weight:700;font-family:var(--mono);color:${sevColor};background:${sevBg};border:1px solid ${sevColor}44;padding:2px 7px;border-radius:4px">${sevIcon} ${sevLabel}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${typeLabel}</span>
+        </div>
         <div class="warning-reason">${w.reason}</div>
-        <div class="warning-suggest">💡 ${w.suggestion}</div>
+        <div class="warning-suggest" style="color:var(--muted)">💡 ${w.suggestion}</div>
       </div>
-    </div>`).join('') || '<div style="color:var(--accent);font-size:13px;padding:10px 0">✓ 未發現明顯風險</div>';
+    </div>`;
+  }).join('') || '<div style="color:var(--accent);font-size:13px;padding:10px 0">✓ 未發現明顯風險</div>';
 
   document.getElementById('rewardResult').innerHTML = `
     <div class="result-section">
@@ -3504,6 +3617,11 @@ function renderRetention(r, formData) {
       <div class="result-header"><div class="result-title">留存預測指標</div></div>
       <div class="metric-grid">
         <div class="metric-card">
+          <div class="metric-label">ARPU 基準</div>
+          <div class="metric-val" id="arpu-val">$${(sim.arpu_baseline||0).toFixed(2)}</div>
+          <div class="metric-note">${formData?.gameType || 'RPG/抽卡'}</div>
+        </div>
+        <div class="metric-card">
           <div class="metric-label">D1 留存（基準）</div>
           <div class="metric-val neutral">${(base.d1||0).toFixed(1)}%</div>
           <div class="metric-delta" style="color:var(--muted)">行業基準值</div>
@@ -3519,7 +3637,7 @@ function renderRetention(r, formData) {
           <div class="metric-delta">${fmtDelta(d30Delta)} vs 基準 ${(base.d30||0).toFixed(1)}%</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Net Retention Impact</div>
+          <div class="metric-label">淨留存影響</div>
           <div class="metric-val ${fmtClass(nri)}">${nri}</div>
           <div class="metric-delta" style="color:var(--muted)">EB ${(s.eb||0).toFixed(2)} − FC ${(s.fc||0).toFixed(2)}</div>
         </div>
@@ -3550,13 +3668,17 @@ function renderRetention(r, formData) {
         ${interp.summary || '—'}
       </div>
       <div class="interp-grid">
-        <div class="interp-card risk">
-          <h4>風險項目</h4>
-          <ul>${(interp.risks||[]).map(r=>`<li>${r}</li>`).join('') || '<li>無明顯風險</li>'}</ul>
+        <div class="interp-card risk" style="border-left:3px solid #f5a623;background:rgba(245,166,35,.04)">
+          <h4 style="display:flex;align-items:center;gap:7px">
+            <span style="font-size:10px;font-weight:700;font-family:var(--mono);color:#f5a623;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.4);padding:2px 7px;border-radius:4px">△ 風險項目</span>
+          </h4>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px">${(interp.risks||[]).map(r=>`<li style="font-size:13px;line-height:1.5;padding-left:4px">${r}</li>`).join('') || '<li style="color:var(--accent)">✓ 無明顯風險</li>'}</ul>
         </div>
-        <div class="interp-card oppty">
-          <h4>機會與優化方向</h4>
-          <ul>${(interp.opportunities||[]).map(o=>`<li>${o}</li>`).join('') || '<li>—</li>'}</ul>
+        <div class="interp-card oppty" style="border-left:3px solid #00e5a0;background:rgba(0,229,160,.04)">
+          <h4 style="display:flex;align-items:center;gap:7px">
+            <span style="font-size:10px;font-weight:700;font-family:var(--mono);color:#00e5a0;background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.35);padding:2px 7px;border-radius:4px">↑ 機會方向</span>
+          </h4>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px">${(interp.opportunities||[]).map(o=>`<li style="font-size:13px;line-height:1.5;padding-left:4px">${o}</li>`).join('') || '<li>—</li>'}</ul>
         </div>
       </div>
     </div>`;
@@ -3575,21 +3697,22 @@ function renderRetention(r, formData) {
             label: '基準留存',
             data: [base.d1||0, base.d7||0, base.d30||0],
             borderColor: '#6b7280',
-            backgroundColor: 'rgba(107,114,128,.1)',
+            backgroundColor: 'rgba(107,114,128,.06)',
             borderDash: [5,3],
             tension: 0.4,
             pointRadius: 5,
-            pointBackgroundColor: '#6b7280'
+            pointBackgroundColor: '#6b7280',
+            fill: false,
           },
           {
             label: '活動後預測',
             data: [base.d1||0, s.d7_new||0, s.d30_new||0],
             borderColor: '#00e5a0',
-            backgroundColor: 'rgba(0,229,160,.1)',
+            backgroundColor: 'rgba(0,229,160,.15)',
             tension: 0.4,
             pointRadius: 5,
             pointBackgroundColor: '#00e5a0',
-            fill: true
+            fill: '-1'
           }
         ]
       },
@@ -4969,6 +5092,7 @@ function shrinkMetricVals() {
     // Defer until DOM ready
     document.addEventListener('DOMContentLoaded', () => {
       showApp();
+      updateSliders();  // Initialize distribution bar with default values
       if (mode === 'prelaunch') {
         setTimeout(() => switchMode('prelaunch'), 50);
       }
@@ -5415,6 +5539,16 @@ function applyDiagRec(type) {
   const btn   = document.getElementById('diagnosisToggleBtn');
   if (panel) panel.style.display = 'none';
   if (btn) btn.textContent = '展開';
+  // Flash highlight the event type cards to show it was updated
+  const cards = document.getElementById('eventTypeCards');
+  if (cards) {
+    cards.style.transition = 'box-shadow .1s';
+    cards.style.boxShadow = '0 0 0 2px var(--accent)';
+    cards.style.borderRadius = '8px';
+    setTimeout(() => {
+      cards.style.boxShadow = 'none';
+    }, 800);
+  }
   // Scroll to form
   document.getElementById('liveopsForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -6053,6 +6187,9 @@ function renderPrelaunch(r, calc) {
   renderTrend(calc);
   renderCohort(calc);
   setTimeout(shrinkMetricVals, 150);
+  // Show print button now that report is ready
+  const _pb = document.getElementById('printReportBtn');
+  if (_pb) _pb.style.display = 'inline-flex';
 }
 
 function renderVerdict(r, calc) {
